@@ -72,6 +72,7 @@ const literalAssembly = fileURLToPath(
   new URL("../tests/conformance/swift/decoder-safeguards.S", import.meta.url),
 );
 const literalObject = join(root, "decoder-safeguards.o");
+const unresolvedJumpObject = join(root, "unresolved-string-jump.o");
 const reports = [];
 let literalReport;
 let decoderCleaned = true;
@@ -95,6 +96,19 @@ try {
     ],
     { timeout: 60_000 },
   );
+  await execute(
+    "xcrun",
+    [
+      "clang",
+      "-target",
+      "arm64-apple-macosx13.0",
+      "-c",
+      unresolvedJumpSource,
+      "-o",
+      unresolvedJumpObject,
+    ],
+    { timeout: 60_000 },
+  );
   // Decoding covers AArch64 register pairs, so build that slice on any Mac host.
   await execute(
     "swiftc",
@@ -104,7 +118,7 @@ try {
       "arm64-apple-macosx13.0",
       literalSource,
       literalObject,
-      unresolvedJumpSource,
+      unresolvedJumpObject,
       "-o",
       literalBinary,
     ],
